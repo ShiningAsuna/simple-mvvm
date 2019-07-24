@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,7 @@
 </head>
 <body>
   <div id="info">
+    <input v-model="age" v-on:click="sayHi" type="text">
     <h1>当前登录人：{{name}}，年龄：{{age}}</h1>
   </div>
   <script src="mvvm.js"></script>

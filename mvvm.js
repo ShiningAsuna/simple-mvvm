@@ -30,6 +30,7 @@ class Mvvm {
   constructor(opt){
     this.el = opt.el;
     this.data = opt.data;
+    this.method = opt.method;
     observe(this.data);
     this.compile();
   }
@@ -39,6 +40,7 @@ class Mvvm {
   }
   traverse($el){
     if($el.nodeType === 1){
+      this.renderAttr($el);
       $el.childNodes.forEach(child => {
         this.traverse(child);
       });   
@@ -61,6 +63,37 @@ class Mvvm {
         node.nodeValue = node.nodeValue.replace(value, newVal);
       });
     }
+  }
+  renderAttr(node) {
+    [...node.attributes].forEach( attr => {
+      let attrName = attr.name;
+      if(this.isModelCommand(attrName)){
+        this.bindModel(node, attr);
+      } else if(this.isEventCommand(attrName)){
+        this.bindEvent(node, attr);
+      }
+    } );
+  }
+  isModelCommand(attrName) {
+    return attrName === 'v-model';
+  }
+  isEventCommand(attrName) {
+    return /v-on:.+/.test(attrName);
+  }
+  bindModel(node, attr) {
+    let key = attr.value;
+    new Observer(this, key, (oldVal, newVal) => {
+      node.value = newVal;
+    });
+    node.oninput = e => {
+      this.data[key] = e.target.value;
+    };
+  }
+  bindEvent(node, attr) {
+    let attrName = attr.name;
+    let methodName = attr.value;
+    let eventName = attrName.substring(5, attrName.length);
+    node.addEventListener(eventName, this.method[methodName]);
   }
 }
 
@@ -125,6 +158,11 @@ var vm = new Mvvm({
   data: {
     name: "evan",
     age: 20
+  },
+  method: {
+    sayHi: function(){
+      alert('Hello');
+    }
   }
 }) 
 
